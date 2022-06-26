@@ -12,7 +12,7 @@ We received contributions from different groups, including：
 	- ASL-MRICloud from the Johns Hopkins University School of Medicine
 	- BASIL and Quantiphyse（ASL) from the University of Nottingham, Clinical ASL from UMC Utrecht
 	- DeepASL from the Technical University of Munich
-	- ExploreASL from a team of international researchers (https://sites.google.com/view/exploreasl/team?authuser=0).  
+	- ExploreASL from a team of international researchers (www.ExploreASL.org).  
 
 ## What we have presented here!
 The source code has been reviewed by our team and the functionalities are being separated and documented. However, one function  may have dependences on other functions within the repository. So, in this git repository, all functions will be preseneted within their original repo.
