@@ -35,7 +35,6 @@ e.g.:
 """
 
 def make_nii(*args):
-    import numpy as np
     
     nii = {'img': args[0]}
     dims = nii['img'].shape
@@ -146,6 +145,7 @@ def image_dimension(dims, voxel_size, datatype, maxval, minval):
         precision = 'float64'
     else:
         raise ValueError('Datatype is not supported by make_nii.')
+    
     dime['slice_start'] = 0
     dime['pixdim'] = voxel_size
     dime['vox_offset'] = 0
