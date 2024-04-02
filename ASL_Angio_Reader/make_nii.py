@@ -33,6 +33,7 @@ e.g.:
   - Jimmy Shen (pls@rotman-baycrest.on.ca)
 
 """
+import numpy as np
 
 def make_nii(*args):
     
