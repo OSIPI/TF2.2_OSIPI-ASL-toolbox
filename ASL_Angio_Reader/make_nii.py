@@ -115,41 +115,25 @@ def image_dimension(dims, voxel_size, datatype, maxval, minval):
     dime['intent_code'] = 0
     dime['datatype'] = datatype
 
-    if datatype == 2:
-        dime['bitpix'] = 8
-        precision = 'uint8'
-    elif datatype == 4:
-        dime['bitpix'] = 16
-        precision = 'int16'
-    elif datatype == 8:
-        dime['bitpix'] = 32
-        precision = 'int32'
-    elif datatype == 16:
-        dime['bitpix'] = 32
-        precision = 'float32'
-    elif datatype == 32:
-        dime['bitpix'] = 64
-        precision = 'float32'
-    elif datatype == 64:
-        dime['bitpix'] = 64
-        precision = 'float64'
-    elif datatype == 128:
-        dime['bitpix'] = 24
-        precision = 'uint8'
-    elif datatype == 256:
-        dime['bitpix'] = 8
-        precision = 'int8'
-    elif datatype == 512:
-        dime['bitpix'] = 16
-        precision = 'uint16'
-    elif datatype == 768:
-        dime['bitpix'] = 32
-        precision = 'uint32'
-    elif datatype == 1792:
-        dime['bitpix'] = 128
-        precision = 'float64'
+    bitpix_map = {
+    2: 8,
+    4: 16,
+    8: 32,
+    16: 32,
+    32: 64,
+    64: 64,
+    128: 24,
+    256: 8,
+    512: 16,
+    768: 32,
+    1792: 128
+    }
+
+    if datatype in bitpix_map:
+        dime['bitpix'] = bitpix_map[datatype]
     else:
         raise ValueError('Datatype is not supported by make_nii.')
+
     
     dime['slice_start'] = 0
     dime['pixdim'] = voxel_size
