@@ -92,42 +92,33 @@ def MIP_reader(filename):
     sub = odd_acc - even_acc
 
     with tqdm(total = NPhases, desc = 'Magnitude') as pbar:
-        for x in range(NPhases+1):
-            pbar.update(1/(NPhases + 1))
+        for x in range(NPhases):
+            pbar.update(1/(NPhases))
+            datatype = np.int64
+            origin = [1, 1, 1]
             if x == 1:
                 MIP1 = np.max(sub[:,:,:,0], axis=2)
                 origin = [4, 4, 4]
-                datatype = np.int64
                 nii = make_nii(MIP1, None, origin, datatype)
                 save_nii(nii,'MIP1.nii')
             if x == 2:
                 MIP2 = np.max(sub[:,:,:,1], axis=2)
-                origin = [1, 1, 1]
-                datatype = np.int64
                 nii = make_nii(MIP2, None, origin, datatype)
                 save_nii(nii,'MIP2.nii')
             if x == 3:
                 MIP3 = np.max(sub[:,:,:,2], axis=2)
-                origin = [1, 1, 1]
-                datatype = np.int64
                 nii = make_nii(MIP3, None, origin, datatype)
                 save_nii(nii,'MIP3.nii')
             if x == 4:
                 MIP4 = np.max(sub[:,:,:,3], axis=2)
-                origin = [1, 1, 1]
-                datatype = np.int64
                 nii = make_nii(MIP4, None, origin, datatype)
                 save_nii(nii,'MIP4.nii')
             if x == 5:
                 MIP5 = np.max(sub[:,:,:,4], axis=2)
-                origin = [1, 1, 1]
-                datatype = np.int64
                 nii = make_nii(MIP5, None, origin, datatype)
                 save_nii(nii,'MIP5.nii')
             if x == 6:
                 MIP6 = np.max(sub[:,:,:,5], axis=2)
-                origin = [1, 1, 1]
-                datatype = np.int64
                 nii = make_nii(MIP6, None, origin, datatype)
                 save_nii(nii,'MIP6.nii')
             
