@@ -1,6 +1,6 @@
 import re
 import numpy as np
-import tqdm
+from tqdm import trange
 import make_nii
 import gc
 
@@ -53,14 +53,11 @@ def MIP_reader(filename):
     recdata = open(filename + '.REC', 'r')
 
     # Create a progress bar for separating image types
-    with tqdm(total=Itype, desc='Separating Image Types') as pbar:
-        for x in range(Itype + 1):
-            if x == 0:
-                # Example data loading and reshaping, replace with actual code
-                recdata = np.random.randint(0, 100, size=(xRes * yRes * NDynamics * NSlices * NPhases), dtype=np.int16)
-                ASLdatamag = np.reshape(recdata, (xRes, yRes, 2, NDynamics // 2, NSlices, NPhases))
-            # Update progress bar
-            pbar.update(1)
+    for x in trange(Itype + 1):
+        if x == 0:
+            # Example data loading and reshaping, replace with actual code
+            recdata = np.random.randint(0, 100, size=(xRes * yRes * NDynamics * NSlices * NPhases), dtype=np.int16)
+            ASLdatamag = np.reshape(recdata, (xRes, yRes, 2, NDynamics // 2, NSlices, NPhases))
 
     # Clear recdata
     del recdata
@@ -91,34 +88,33 @@ def MIP_reader(filename):
 
     sub = odd_acc - even_acc
 
-    with tqdm(total = NPhases, desc = 'Magnitude') as pbar:
-        for x in range(NPhases):
-            pbar.update(1/(NPhases))
-            datatype = np.int64
-            origin = [1, 1, 1]
-            if x == 1:
-                MIP1 = np.max(sub[:,:,:,0], axis=2)
-                origin = [4, 4, 4]
-                nii = make_nii(MIP1, None, origin, datatype)
-                save_nii(nii,'MIP1.nii')
-            if x == 2:
-                MIP2 = np.max(sub[:,:,:,1], axis=2)
-                nii = make_nii(MIP2, None, origin, datatype)
-                save_nii(nii,'MIP2.nii')
-            if x == 3:
-                MIP3 = np.max(sub[:,:,:,2], axis=2)
-                nii = make_nii(MIP3, None, origin, datatype)
-                save_nii(nii,'MIP3.nii')
-            if x == 4:
-                MIP4 = np.max(sub[:,:,:,3], axis=2)
-                nii = make_nii(MIP4, None, origin, datatype)
-                save_nii(nii,'MIP4.nii')
-            if x == 5:
-                MIP5 = np.max(sub[:,:,:,4], axis=2)
-                nii = make_nii(MIP5, None, origin, datatype)
-                save_nii(nii,'MIP5.nii')
-            if x == 6:
-                MIP6 = np.max(sub[:,:,:,5], axis=2)
-                nii = make_nii(MIP6, None, origin, datatype)
-                save_nii(nii,'MIP6.nii')
+    #Create progress bar 
+    for x in trange(NPhases):
+        datatype = np.int64
+        origin = [1, 1, 1]
+        if x == 1:
+            MIP1 = np.max(sub[:,:,:,0], axis=2)
+            origin = [4, 4, 4]
+            nii = make_nii(MIP1, None, origin, datatype)
+            save_nii(nii,'MIP1.nii')
+        if x == 2:
+            MIP2 = np.max(sub[:,:,:,1], axis=2)
+            nii = make_nii(MIP2, None, origin, datatype)
+            save_nii(nii,'MIP2.nii')
+        if x == 3:
+            MIP3 = np.max(sub[:,:,:,2], axis=2)
+            nii = make_nii(MIP3, None, origin, datatype)
+            save_nii(nii,'MIP3.nii')
+        if x == 4:
+            MIP4 = np.max(sub[:,:,:,3], axis=2)
+            nii = make_nii(MIP4, None, origin, datatype)
+            save_nii(nii,'MIP4.nii')
+        if x == 5:
+            MIP5 = np.max(sub[:,:,:,4], axis=2)
+            nii = make_nii(MIP5, None, origin, datatype)
+            save_nii(nii,'MIP5.nii')
+        if x == 6:
+            MIP6 = np.max(sub[:,:,:,5], axis=2)
+            nii = make_nii(MIP6, None, origin, datatype)
+            save_nii(nii,'MIP6.nii')
             
