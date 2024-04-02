@@ -39,12 +39,14 @@ def make_nii(*args):
     nii = {'img': args[0]}
     dims = nii['img'].shape
     dims = (len(dims),) + dims + (1,) * 8
-    dims = dims[:8]
+    dims = dims[:8] #Limit dims to 8 elements
+
     voxel_size = (0,) + (1,) * 7
     origin = (0,) * 5
     datatype = 16
     descrip = ''
-    
+
+    #Processing variable argument number
     if len(args) > 1 and args[1] is not None:
         voxel_size = (voxel_size[0],) + tuple(float(v) for v in args[1]) + voxel_size[4:]
     if len(args) > 2 and args[2] is not None:
@@ -53,6 +55,7 @@ def make_nii(*args):
         datatype = int(args[3])
     if len(args) > 4 and args[4] is not None:
         descrip = args[4]
+
     # Fix dims in the case of RGB datatype
     if datatype == 128:
         dims = (dims[0]-1,) + dims[1:4] + dims[5:8] + (1,)
@@ -62,30 +65,26 @@ def make_nii(*args):
 
     nii['hdr'] = make_header(dims, voxel_size, origin, datatype, descrip, maxval, minval)
 
-    if nii['hdr']['dime']['datatype'] == 2:
-        nii['img'] = nii['img'].astype(np.uint8)
-    elif nii['hdr']['dime']['datatype'] == 4:
-        nii['img'] = nii['img'].astype(np.int16)
-    elif nii['hdr']['dime']['datatype'] == 8:
-        nii['img'] = nii['img'].astype(np.int32)
-    elif nii['hdr']['dime']['datatype'] == 16:
-        nii['img'] = nii['img'].astype(np.float32)
-    elif nii['hdr']['dime']['datatype'] == 32:
-        nii['img'] = nii['img'].astype(np.float32)
-    elif nii['hdr']['dime']['datatype'] == 64:
-        nii['img'] = nii['img'].astype(np.float64)
-    elif nii['hdr']['dime']['datatype'] == 128:
-        nii['img'] = nii['img'].astype(np.uint8)
-    elif nii['hdr']['dime']['datatype'] == 256:
-        nii['img'] = nii['img'].astype(np.int8)
-    elif nii['hdr']['dime']['datatype'] == 512:
-        nii['img'] = nii['img'].astype(np.uint16)
-    elif nii['hdr']['dime']['datatype'] == 768:
-        nii['img'] = nii['img'].astype(np.uint32)
-    elif nii['hdr']['dime']['datatype'] == 1792:
-        nii['img'] = nii['img'].astype(np.float64)
+    dtype_mapping = {
+        2: np.uint8,
+        4: np.int16,
+        8: np.int32,
+        16: np.float32,
+        32: np.float32,
+        64: np.float64,
+        128: np.uint8,
+        256: np.int8,
+        512: np.uint16,
+        768: np.uint32,
+        1792: np.float64
+    }
+
+    #Check if provided datatype is supported
+    if nii['hdr']['dime']['datatype'] in dtype_mapping:
+        nii['img'] = nii['img'].astype(dtype_mapping[nii['hdr']['dime']['datatype']])
     else:
         raise ValueError('Datatype is not supported by make_nii.')
+    
     return nii
 
 def make_header(dims, voxel_size, origin, datatype, descrip, maxval, minval):
@@ -114,6 +113,7 @@ def image_dimension(dims, voxel_size, datatype, maxval, minval):
     dime['intent_p3'] = 0
     dime['intent_code'] = 0
     dime['datatype'] = datatype
+
     if datatype == 2:
         dime['bitpix'] = 8
         precision = 'uint8'
@@ -164,6 +164,7 @@ def image_dimension(dims, voxel_size, datatype, maxval, minval):
     dime['toffset'] = 0
     dime['glmax'] = maxval
     dime['glmin'] = minval
+
     return dime
 
 
@@ -186,6 +187,7 @@ def data_history(origin, descrip):
         'magic': '',
         'originator': origin
     }
+
     return hist
 
 
