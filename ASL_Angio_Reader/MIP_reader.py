@@ -2,6 +2,7 @@ import re
 import numpy as np
 import tqdm
 import make_nii
+import gc
 
 
 # PAR File lines (0-indexed):
@@ -46,6 +47,7 @@ def MIP_reader(filename):
 
     Itype = 4
     del(pardata)
+    gc.collect() 
 
     # Read full data
     recdata = open(filename + '.REC', 'r')
@@ -55,13 +57,14 @@ def MIP_reader(filename):
         for x in range(Itype + 1):
             if x == 0:
                 # Example data loading and reshaping, replace with actual code
-                recrawdata = np.random.randint(0, 100, size=(xRes * yRes * NDynamics * NSlices * NPhases), dtype=np.int16)
-                ASLdatamag = np.reshape(recrawdata, (xRes, yRes, 2, NDynamics // 2, NSlices, NPhases))
+                recdata = np.random.randint(0, 100, size=(xRes * yRes * NDynamics * NSlices * NPhases), dtype=np.int16)
+                ASLdatamag = np.reshape(recdata, (xRes, yRes, 2, NDynamics // 2, NSlices, NPhases))
             # Update progress bar
             pbar.update(1)
 
-    # Clear recrawdata
-    del recrawdata
+    # Clear recdata
+    del recdata
+    gc.collect() 
 
     # Separate even and odd numbered Labels
     even = ASLdatamag[:, :, 1, :, :, :]
