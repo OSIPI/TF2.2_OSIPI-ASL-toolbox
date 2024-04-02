@@ -44,6 +44,7 @@ def make_nii(*args):
     origin = (0,) * 5
     datatype = 16
     descrip = ''
+    
     if len(args) > 1 and args[1] is not None:
         voxel_size = (voxel_size[0],) + tuple(float(v) for v in args[1]) + voxel_size[4:]
     if len(args) > 2 and args[2] is not None:
@@ -55,9 +56,12 @@ def make_nii(*args):
     # Fix dims in the case of RGB datatype
     if datatype == 128:
         dims = (dims[0]-1,) + dims[1:4] + dims[5:8] + (1,)
+
     maxval = np.round(np.max(nii['img'])).astype(int)
     minval = np.round(np.min(nii['img'])).astype(int)
+
     nii['hdr'] = make_header(dims, voxel_size, origin, datatype, descrip, maxval, minval)
+
     if nii['hdr']['dime']['datatype'] == 2:
         nii['img'] = nii['img'].astype(np.uint8)
     elif nii['hdr']['dime']['datatype'] == 4:
