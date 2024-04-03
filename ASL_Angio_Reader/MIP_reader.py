@@ -3,6 +3,8 @@ import numpy as np
 from tqdm import trange
 import make_nii
 import gc
+from save_nii import save_nii
+
 
 
 # PAR File lines (0-indexed):
@@ -13,8 +15,19 @@ import gc
 # 97-99 = Header von "Image Information"
 # 100-end = real Image part
 
+
 def MIP_reader(filename):
+    """
+    Parameters:
+        filename: name of .PAR file to be read
+    Return:
+        Does not return anything, but will save MIP1 to MIP6
+        in nii format in the folder.
+    """
     # Read image parameter from PAR file
+    if filename.endswith(".PAR"):
+        filename = filename[:-4]
+
     with open(filename + '.PAR', 'r') as parfile:
         pardata = parfile.readlines()
 
@@ -72,6 +85,12 @@ def MIP_reader(filename):
     PV_even = even * RS + RI
     FP_odd = PV_odd / (RS * SS)
     FP_even = PV_even / (RS * SS)
+
+    del(even)
+    del(odd)
+    del(PV_even)
+    del(PV_odd)
+    gc.collect()
 
     # Add up all even and odd images
     even_acc = np.zeros((xRes, yRes, NSlices, NPhases))
