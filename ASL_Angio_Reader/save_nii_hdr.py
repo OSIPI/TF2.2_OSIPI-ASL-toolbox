@@ -66,6 +66,8 @@ def write_header_key(filename, hk):
      f.write(struct.pack('B', hk['regular']))  # might be uint8
     
      f.write(struct.pack('B', hk['dim_info'])) #uchar
+
+     f.close()
     
      return
 
@@ -98,6 +100,7 @@ def write_image_dimension(filename, dime):
     f.write(struct.pack('f', dime['toffset'][0]))                # float32
     f.write(struct.pack('i', dime['glmax'][0]))                  # int32
     f.write(struct.pack('i', dime['glmin'][0]))                  # int32
+    f.close()
 
     return  # image_dimension
 
@@ -138,6 +141,8 @@ def write_data_history(filename, hist):
     pad_magic = b'\0' * (4 - len(hist['magic']))
     hist_magic_padded = (hist['magic'] + pad_magic)[:4]
     f.write(hist_magic_padded.encode('utf-8'))  # uchar
+
+    f.close()
     
     return
 
