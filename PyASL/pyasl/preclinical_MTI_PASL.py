@@ -27,11 +27,11 @@ def T1fit(xdata: np.ndarray, ydata: np.ndarray):
     return x0
 
 
-def preclinical_multiTE_pipeline(
+def preclinical_MTI_PASL_pipeline(
     data: np.ndarray,
     sel_index: list,
     glo_index: list,
-    TE_list: list,
+    TI_list: list,
     mask_array=None,
     save_dir=None,
 ):
@@ -39,7 +39,7 @@ def preclinical_multiTE_pipeline(
     CBF = np.zeros(data.shape[:2])
     sel = data[:, :, np.array(sel_index)]
     glo = data[:, :, np.array(glo_index)]
-    TE_list = np.array(TE_list)
+    TI_list = np.array(TI_list)
 
     # apply mask
     if mask_array is not None:
@@ -65,23 +65,23 @@ def preclinical_multiTE_pipeline(
     for x in range(data.shape[0]):
         for y in range(data.shape[1]):
             if A[x, y, 0] != 0:
-                x0_a = T1fit(TE_list, A[x, y])
+                x0_a = T1fit(TI_list, A[x, y])
                 T1_glo = x0_a[1]
-                x0_b = T1fit(TE_list, B[x, y])
+                x0_b = T1fit(TI_list, B[x, y])
                 T1_sel = x0_b[1]
 
                 if counter % plot_interval == 0:
-                    plt.scatter(TE_list, A[x, y])
+                    plt.scatter(TI_list, A[x, y])
                     plt.plot(
-                        TE_list,
-                        np.abs(T1fit_function(TE_list, *x0_a)),
+                        TI_list,
+                        np.abs(T1fit_function(TI_list, *x0_a)),
                         "b",
                         linewidth=0.5,
                     )
-                    plt.scatter(TE_list, B[x, y])
+                    plt.scatter(TI_list, B[x, y])
                     plt.plot(
-                        TE_list,
-                        np.abs(T1fit_function(TE_list, *x0_b)),
+                        TI_list,
+                        np.abs(T1fit_function(TI_list, *x0_b)),
                         "b",
                         linewidth=0.5,
                     )
@@ -98,10 +98,10 @@ def preclinical_multiTE_pipeline(
         with open(os.path.join(save_dir, "config.txt"), "w") as f:
             if mask_array is None:
                 f.write(
-                    f"preclinical_multiTE_pipeline(data, sel_index={sel_index}, glo_index={glo_index}, TE_list={TE_list}, mask_array=None, save_dir='{save_dir}')"
+                    f"preclinical_MTI_PASL_pipeline(data, sel_index={sel_index}, glo_index={glo_index}, TI_list={TI_list}, mask_array=None, save_dir='{save_dir}')"
                 )
             else:
                 f.write(
-                    f"preclinical_multiTE_pipeline(data, sel_index={sel_index}, glo_index={glo_index}, TE_list={TE_list}, mask_array, save_dir='{save_dir}')"
+                    f"preclinical_MTI_PASL_pipeline(data, sel_index={sel_index}, glo_index={glo_index}, TI_list={TI_list}, mask_array, save_dir='{save_dir}')"
                 )
         return CBF

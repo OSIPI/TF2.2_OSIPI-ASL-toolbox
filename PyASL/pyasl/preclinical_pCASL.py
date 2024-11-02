@@ -407,7 +407,7 @@ def plot_save_fig(data: np.ndarray, fig_title: str, fig_path: str, range=None):
     plt.savefig(fig_path)
 
 
-def preclinical_singleTE_pipeline(
+def preclinical_pCASL_pipeline(
     root: str,
     keyword="asl",
     control_first=True,
@@ -560,7 +560,7 @@ def preclinical_singleTE_pipeline(
 
     with open(os.path.join(savedir, "config.txt"), "w") as f:
         f.write(
-            f"preclinical_singleTE_pipeline(root='{root}', keyword='{keyword}', control_first={control_first}, SGap={SGap}, T1blood={T1blood}, relCBF_vmax={relCBF_vmax}, mask_thres={mask_thres})"
+            f"preclinical_pCASL_pipeline(root='{root}', keyword='{keyword}', control_first={control_first}, SGap={SGap}, T1blood={T1blood}, relCBF_vmax={relCBF_vmax}, mask_thres={mask_thres})"
         )
 
     print("Processing complete!")
