@@ -27,7 +27,7 @@ def img_rescale(source_path: str, target_path: str):
     rescaled_img.to_filename(target_path)
 
 
-def mricloud_rescale(data_descrip):
+def mricloud_rescale(data_descrip: dict):
     print("MRICloud: Rescale ASL data...")
     for key, value in data_descrip["Images"].items():
         for asl_file in value["asl"]:
@@ -247,7 +247,7 @@ def mricloud_bgs_factor(
     return mz
 
 
-def mricloud_calculate_M0(data_descrip: dict, t1_tissue: float):
+def mricloud_calculate_M0(data_descrip: dict, t1_tissue: float, bgs_eff):
     print("MRICloud: Calculate M0...")
 
     current_dir = os.path.dirname(__file__)
@@ -316,17 +316,27 @@ def mricloud_calculate_M0(data_descrip: dict, t1_tissue: float):
         else:
             m0tmp = np.zeros_like(ctrlvol)
             nslice = ctrlvol.shape[2]
-            if data_descrip["ArterialSpinLabelingType"] == "pCASL":
+            if data_descrip["ArterialSpinLabelingType"] == "PCASL":
                 totdur = (
-                    data_descrip["LabelingDuration"]
-                    + list(set([x for x in data_descrip["PLDList"] if x != 0]))[0]
+                    data_descrip["LabelingDuration"] * 1000
+                    + list(
+                        set([x * 1000.0 for x in data_descrip["PLDList"] if x != 0])
+                    )[0]
                 )
             elif data_descrip["ArterialSpinLabelingType"] == "PASL":
-                totdur = list(set([x for x in data_descrip["PLDList"] if x != 0]))[0]
+                totdur = (
+                    data_descrip["BolusCutOffDelayTime"] * 1000
+                    + list(
+                        set([x * 1000.0 for x in data_descrip["PLDList"] if x != 0])
+                    )[0]
+                )
             for kk in range(nslice):
                 if not data_descrip["BackgroundSuppression"]:
                     if data_descrip["MRAcquisitionType"] == "2D":
-                        timing = [0, totdur + data_descrip["SliceDuration"] * (kk - 1)]
+                        timing = [
+                            0,
+                            totdur + data_descrip["SliceDuration"] * 1000 * (kk - 1),
+                        ]
                     else:
                         timing = [0, totdur]
                     flip = [0, 0]
@@ -335,17 +345,31 @@ def mricloud_calculate_M0(data_descrip: dict, t1_tissue: float):
                     if data_descrip["MRAcquisitionType"] == "2D":
                         timing = (
                             [0]
-                            + data_descrip["BackgroundSuppressionPulseTime"][:-1]
+                            + [
+                                x * 1000
+                                for x in data_descrip["BackgroundSuppressionPulseTime"][
+                                    :-1
+                                ]
+                            ]
                             + [
                                 data_descrip["BackgroundSuppressionPulseTime"][-1]
-                                + data_descrip["SliceDuration"] * (kk - 1)
+                                * 1000
+                                + data_descrip["SliceDuration"] * 1000 * (kk - 1)
                             ]
                         )
                     else:
                         timing = (
                             [0]
-                            + data_descrip["BackgroundSuppressionPulseTime"][:-1]
-                            + [data_descrip["BackgroundSuppressionPulseTime"][-1]]
+                            + [
+                                x * 1000
+                                for x in data_descrip["BackgroundSuppressionPulseTime"][
+                                    :-1
+                                ]
+                            ]
+                            + [
+                                data_descrip["BackgroundSuppressionPulseTime"][-1]
+                                * 1000
+                            ]
                         )
                     flip = (
                         [0]
@@ -358,7 +382,7 @@ def mricloud_calculate_M0(data_descrip: dict, t1_tissue: float):
                         t1_tissue,
                         flip,
                         timing,
-                        data_descrip["BackgroundSuppressionEfficiency"],
+                        bgs_eff,
                     )
                 m0tmp[:, :, kk] = ctrlvol[:, :, kk] / bgs_f
 
@@ -380,7 +404,9 @@ def mricloud_calculate_M0(data_descrip: dict, t1_tissue: float):
         brnmsk_clcu_img.to_filename(os.path.join(key, "perf", "brnmsk_clcu.nii"))
 
 
-def mricloud_calculate_CBF(data_descrip: dict, t1_blood: float, part_coef: float):
+def mricloud_calculate_CBF(
+    data_descrip: dict, t1_blood: float, part_coef: float, bgs_eff
+):
     print("MRICloud: Calculate CBF...")
 
     for key, value in data_descrip["Images"].items():
@@ -401,31 +427,43 @@ def mricloud_calculate_CBF(data_descrip: dict, t1_blood: float, part_coef: float
             nslice = tmpcbf.shape[2]
 
             for kk in range(nslice):
-                if data_descrip["ArterialSpinLabelingType"] == "pCASL":
+                if data_descrip["ArterialSpinLabelingType"] == "PCASL":
                     casl_pld = list(
-                        set([x for x in data_descrip["PLDList"] if x != 0])
+                        set([x * 1000.0 for x in data_descrip["PLDList"] if x != 0])
                     )[0]
                     if data_descrip["MRAcquisitionType"] == "3D":
                         spld = casl_pld
                     else:
-                        spld = casl_pld + data_descrip["SliceDuration"] * (kk - 1)
+                        spld = casl_pld + data_descrip["SliceDuration"] * 1000 * (
+                            kk - 1
+                        )
                     tmpcbf[:, :, kk] = (
                         diff[:, :, kk]
                         * np.exp(spld / t1_blood)
-                        / (1 - np.exp(-data_descrip["LabelingDuration"] / t1_blood))
+                        / (
+                            1
+                            - np.exp(
+                                -data_descrip["LabelingDuration"] * 1000 / t1_blood
+                            )
+                        )
                         / t1_blood
                     )
 
                 elif data_descrip["ArterialSpinLabelingType"] == "PASL":
-                    pasl_ti = list(set([x for x in data_descrip["PLDList"] if x != 0]))[
-                        0
-                    ]
+                    pasl_ti = (
+                        list(
+                            set([x * 1000.0 for x in data_descrip["PLDList"] if x != 0])
+                        )[0]
+                        + data_descrip["BolusCutOffDelayTime"] * 1000
+                    )
                     if data_descrip["MRAcquisitionType"] == "3D":
                         sti = pasl_ti
                     else:
-                        sti = pasl_ti + data_descrip["SliceDuration"] * (kk - 1)
+                        sti = pasl_ti + data_descrip["SliceDuration"] * 1000 * (kk - 1)
                     tmpcbf[:, :, kk] = (
-                        diff[:, :, kk] * np.exp(sti / t1_blood) / data_descrip["TI1"]
+                        diff[:, :, kk]
+                        * np.exp(sti / t1_blood)
+                        / (data_descrip["BolusCutOffDelayTime"] * 1000)
                     )
 
             m0map[np.abs(m0map) < 1e-6] = np.mean(m0map[brnmsk_clcu])
@@ -433,11 +471,10 @@ def mricloud_calculate_CBF(data_descrip: dict, t1_blood: float, part_coef: float
             brvol = brnmsk_dspl.astype(np.float32)
             if data_descrip["BackgroundSuppression"]:
                 alpha = (
-                    data_descrip["BackgroundSuppressionEfficiency"]
-                    ** data_descrip["BackgroundSuppressionNumberPulses"]
-                ) * data_descrip["InversionEfficiency"]
+                    bgs_eff ** data_descrip["BackgroundSuppressionNumberPulses"]
+                ) * data_descrip["LabelingEfficiency"]
             else:
-                alpha = data_descrip["InversionEfficiency"]
+                alpha = data_descrip["LabelingEfficiency"]
             cbf = tmpcbf / m0vol * brvol * part_coef / 2 / alpha * 60 * 100 * 1000
             cbf_thr = np.clip(cbf, 0, 200)
             cbf_glo = np.mean(cbf_thr[brnmsk_clcu])
@@ -543,7 +580,7 @@ def mricloud_multidelay_calculate_M0(data_descrip: dict):
             plds = []
             for i, volume_type in enumerate(data_descrip["ASLContext"]):
                 if volume_type == "label":
-                    plds.append(data_descrip["PLDList"][i])
+                    plds.append(data_descrip["PLDList"][i] * 1000.0)
                 elif volume_type == "control":
                     ctrl_all_list.append(img_all[:, :, :, i])
             plds = np.array(plds)
@@ -554,7 +591,7 @@ def mricloud_multidelay_calculate_M0(data_descrip: dict):
             idx_msk = np.where(brnmsk_dspl)
             m0_map = np.zeros_like(ctrl_last)
 
-            if data_descrip["ArterialSpinLabelingType"] == "pCASL":
+            if data_descrip["ArterialSpinLabelingType"] == "PCASL":
                 ff = lambda x, m0, t1: mricloud_func_recover(m0, t1, x)
                 beta_init = [m0_int, 1165]
                 lowb = [0, 0]
@@ -563,12 +600,12 @@ def mricloud_multidelay_calculate_M0(data_descrip: dict):
                 for ivox in zip(*idx_msk):
                     islc = ivox[2]
                     if data_descrip["MRAcquisitionType"] == "3D":
-                        xdata = plds + data_descrip["LabelingDuration"]
+                        xdata = plds + data_descrip["LabelingDuration"] * 1000
                     else:
                         xdata = (
                             plds
-                            + data_descrip["LabelingDuration"]
-                            + (islc - 1) * data_descrip["SliceDuration"]
+                            + data_descrip["LabelingDuration"] * 1000
+                            + (islc - 1) * data_descrip["SliceDuration"] * 1000
                         )
                     ydata = ctrl_all[np.ravel_multi_index(ivox, brnmsk_dspl.shape), :]
                     beta1, _ = curve_fit(
@@ -587,9 +624,13 @@ def mricloud_multidelay_calculate_M0(data_descrip: dict):
                 for ivox in zip(*idx_msk):
                     islc = ivox[2]
                     if data_descrip["MRAcquisitionType"] == "3D":
-                        xdata = plds
+                        xdata = plds + data_descrip["BolusCutOffDelayTime"] * 1000
                     else:
-                        xdata = plds + (islc - 1) * data_descrip["SliceDuration"]
+                        xdata = (
+                            plds
+                            + data_descrip["BolusCutOffDelayTime"] * 1000
+                            + (islc - 1) * data_descrip["SliceDuration"] * 1000
+                        )
                     ydata = ctrl_all[np.ravel_multi_index(ivox, brnmsk_dspl.shape), :]
                     beta1, _ = curve_fit(
                         ff, xdata, ydata, p0=beta_init, bounds=(lowb, uppb)
@@ -723,11 +764,11 @@ def mricloud_multidelay_calculate_CBFATT(
             plds = []
             for i, volume_type in enumerate(data_descrip["ASLContext"]):
                 if volume_type == "label":
-                    plds.append(data_descrip["PLDList"][i])
+                    plds.append(data_descrip["PLDList"][i] * 1000.0)
             plds = np.array(plds) / 1000
 
             paras = {
-                "labl_eff": data_descrip["InversionEfficiency"],
+                "labl_eff": data_descrip["LabelingEfficiency"],
                 "t1_blood": t1_blood / 1000,
                 "part_coef": part_coef,
             }
@@ -735,9 +776,9 @@ def mricloud_multidelay_calculate_CBFATT(
             attmap = np.zeros_like(m0map)
             cbfmap = np.zeros_like(m0map)
 
-            if data_descrip["ArterialSpinLabelingType"] == "pCASL":
+            if data_descrip["ArterialSpinLabelingType"] == "PCASL":
                 ff = lambda x, cbf, att: mricloud_func_gkm_pcasl_multidelay(
-                    cbf, att, data_descrip["LabelingDuration"] / 1000, x, paras
+                    cbf, att, data_descrip["LabelingDuration"], x, paras
                 )
                 beta_init = [60, 0.5]
                 lowb = [0, 0.1]
@@ -748,7 +789,7 @@ def mricloud_multidelay_calculate_CBFATT(
                     if data_descrip["MRAcquisitionType"] == "3D":
                         xdata = plds
                     else:
-                        xdata = plds + (islc - 1) * data_descrip["SliceDuration"] / 1000
+                        xdata = plds + (islc - 1) * data_descrip["SliceDuration"]
                     ydata = ndiff[np.ravel_multi_index(ivox, brnmsk_dspl.shape), :]
                     beta1, _ = curve_fit(
                         ff,
@@ -765,7 +806,7 @@ def mricloud_multidelay_calculate_CBFATT(
                 ff = lambda x, cbf, att: mricloud_func_gkm_pasl_looklocker(
                     cbf,
                     att,
-                    data_descrip["TI1"] / 1000,
+                    data_descrip["BolusCutOffDelayTime"],
                     x,
                     data_descrip["Looklocker"],
                     paras,
@@ -777,9 +818,13 @@ def mricloud_multidelay_calculate_CBFATT(
                 for ivox in zip(*idx_msk):
                     islc = ivox[2]
                     if data_descrip["MRAcquisitionType"] == "3D":
-                        xdata = plds
+                        xdata = plds + data_descrip["BolusCutOffDelayTime"]
                     else:
-                        xdata = plds + (islc - 1) * data_descrip["SliceDuration"] / 1000
+                        xdata = (
+                            plds
+                            + data_descrip["BolusCutOffDelayTime"]
+                            + (islc - 1) * data_descrip["SliceDuration"]
+                        )
                     ydata = ndiff[np.ravel_multi_index(ivox, brnmsk_dspl.shape), :]
                     beta1, _ = curve_fit(
                         ff, xdata, ydata, p0=beta_init, bounds=(lowb, uppb)
@@ -1030,6 +1075,7 @@ def mricloud_pipeline(
     t1_tissue: float,
     t1_blood: float,
     part_coef: float,
+    bgs_eff=None,
 ):
     print("Process ASL images using MRICloud...")
     data_descrip = read_data_description(root)
@@ -1038,8 +1084,8 @@ def mricloud_pipeline(
     if data_descrip["SingleDelay"]:
         mricloud_realign(data_descrip)
         mricloud_calculate_diffmap(data_descrip)
-        mricloud_calculate_M0(data_descrip, t1_tissue)
-        mricloud_calculate_CBF(data_descrip, t1_blood, part_coef)
+        mricloud_calculate_M0(data_descrip, t1_tissue, bgs_eff)
+        mricloud_calculate_CBF(data_descrip, t1_blood, part_coef, bgs_eff)
     else:
         mricloud_calculate_diffmap(data_descrip)
         mricloud_multidelay_calculate_M0(data_descrip)

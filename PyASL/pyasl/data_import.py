@@ -132,7 +132,7 @@ def check_bids_format(root: str):
     return (True, "", img_type, has_structural)
 
 
-def read_params(params_json: str, has_structural: bool):
+def read_params(params_json: str, has_structural: bool, is_singledelay: bool):
     try:
         with open(params_json, "r") as json_file:
             params = json.load(json_file)
@@ -164,9 +164,8 @@ def read_params(params_json: str, has_structural: bool):
         "M0Type",
         "MRAcquisitionType",
         "BackgroundSuppression",
-        "InversionEfficiency",
-        "LabelControl",
-        "SingleDelay",
+        "LabelingEfficiency",
+        "PostLabelingDelay",
     ]
 
     for key in required_keys:
@@ -174,18 +173,19 @@ def read_params(params_json: str, has_structural: bool):
             return (False, f"Missing parameter: {key}", {})
 
     if (
-        asl_params["ArterialSpinLabelingType"] == "pCASL"
+        asl_params["ArterialSpinLabelingType"] == "PCASL"
         or asl_params["ArterialSpinLabelingType"] == "CASL"
     ):
         required_asl_keys = [
-            "PostLabelingDelay",
             "LabelingDuration",
         ]
     elif asl_params["ArterialSpinLabelingType"] == "PASL":
-        if asl_params["SingleDelay"]:
-            required_asl_keys = ["TI1", "TI"]
+        if is_singledelay:
+            required_asl_keys = [
+                "BolusCutOffDelayTime",
+            ]
         else:
-            required_asl_keys = ["TI1", "TI", "Looklocker"]
+            required_asl_keys = ["BolusCutOffDelayTime", "Looklocker"]
         for key in required_asl_keys:
             if key not in asl_params:
                 return (False, f"Missing parameter: {key}", {})
@@ -194,43 +194,37 @@ def read_params(params_json: str, has_structural: bool):
         if "SliceDuration" not in asl_params:
             return (False, "Missing parameter: SliceDuration", {})
 
-    if (
-        asl_params["ArterialSpinLabelingType"] == "pCASL"
-        or asl_params["ArterialSpinLabelingType"] == "CASL"
-    ):
-        temp_value = asl_params["PostLabelingDelay"]
-        temp_name = "PostLabelingDelay"
-    elif asl_params["ArterialSpinLabelingType"] == "PASL":
-        temp_value = asl_params["TI"]
-        temp_name = "TI"
-
-    if not asl_params["SingleDelay"]:
-        if not isinstance(temp_value, (list)):
+    if not is_singledelay:
+        if not isinstance(asl_params["PostLabelingDelay"], (list)):
             return (
                 False,
-                f"Invalid {temp_name}: should be an array for multi-delay data",
+                f"Invalid PostLabelingDelay: should be an array for multi-delay data",
                 {},
             )
     else:
-        if asl_params["M0Type"] != "Included":
-            if isinstance(temp_value, (list)):
+        if asl_params["M0Type"] == "Included":
+            if not isinstance(asl_params["PostLabelingDelay"], (list)):
                 return (
                     False,
-                    f"Invalid {temp_name}: should be a value for single-delay data",
+                    f"Invalid PostLabelingDelay: should be an array for single-delay data with included M0",
+                    {},
+                )
+        else:
+            if isinstance(asl_params["PostLabelingDelay"], (list)):
+                return (
+                    False,
+                    f"Invalid PostLabelingDelay: should be a value for single-delay data",
                     {},
                 )
 
     if asl_params["M0Type"] == "Included":
-        if not isinstance(temp_value, (list)):
-            return (False, f"Invalid {temp_name}: no M0 included", {})
-        if not (0 in temp_value):
-            return (False, f"Invalid {temp_name}: no M0 included", {})
+        if not (0 in asl_params["PostLabelingDelay"]):
+            return (False, f"Invalid PostLabelingDelay: no M0 included", {})
 
     if asl_params["BackgroundSuppression"]:
         required_bg_keys = [
             "BackgroundSuppressionNumberPulses",
             "BackgroundSuppressionPulseTime",
-            "BackgroundSuppressionEfficiency",
         ]
         for key in required_bg_keys:
             if key not in asl_params:
@@ -273,11 +267,10 @@ def read_params(params_json: str, has_structural: bool):
     return (True, "", params)
 
 
-def make_sidecar(params: dict, num_volumes: int):
+def make_sidecar(
+    params: dict, num_volumes: int, is_singledelay: bool, is_labelcontrol: bool
+):
     asl_json_data = params["ASL"].copy()
-    asl_json_data.pop("LabelControl")
-    asl_json_data.pop("SingleDelay")
-
     structural_json_data = params["anat"].copy()
     m0_json_data = params["M0"].copy()
 
@@ -285,19 +278,21 @@ def make_sidecar(params: dict, num_volumes: int):
         asl_json_data["M0"] = params["M0"].copy()
 
     volume_type = []
-    if (
-        params["ASL"]["ArterialSpinLabelingType"] == "pCASL"
-        or params["ASL"]["ArterialSpinLabelingType"] == "CASL"
-    ):
-        temp_value = params["ASL"]["PostLabelingDelay"]
-    elif params["ASL"]["ArterialSpinLabelingType"] == "PASL":
-        temp_value = params["ASL"]["TI"]
-    if isinstance(temp_value, (list)):
-        for pld in temp_value:
+    if isinstance(params["ASL"]["PostLabelingDelay"], (list)):
+        if is_singledelay:
+            asl_json_data["PostLabelingDelay"] = [
+                x for x in params["ASL"]["PostLabelingDelay"] if x != 0
+            ][0]
+        else:
+            asl_json_data["PostLabelingDelay"] = [
+                x for x in params["ASL"]["PostLabelingDelay"] if x != 0
+            ]
+
+        for pld in params["ASL"]["PostLabelingDelay"]:
             if pld == 0:
                 volume_type.append("m0scan")
             else:
-                if params["ASL"]["LabelControl"]:
+                if is_labelcontrol:
                     volume_type.append("label")
                     volume_type.append("control")
                 else:
@@ -305,7 +300,7 @@ def make_sidecar(params: dict, num_volumes: int):
                     volume_type.append("label")
     else:
         for i in range(int(num_volumes / 2)):
-            if params["ASL"]["LabelControl"]:
+            if is_labelcontrol:
                 volume_type.append("label")
                 volume_type.append("control")
             else:
@@ -315,7 +310,14 @@ def make_sidecar(params: dict, num_volumes: int):
     return asl_json_data, structural_json_data, m0_json_data, tsv_data
 
 
-def convert2bids(root: str, params: dict, img_type: str, has_structural: bool):
+def convert2bids(
+    root: str,
+    params: dict,
+    img_type: str,
+    has_structural: bool,
+    is_singledelay: bool,
+    is_labelcontrol: bool,
+):
     source_path = os.path.join(root, "rawdata")
     all_session_paths = []
     num_volumes = 0
@@ -349,25 +351,18 @@ def convert2bids(root: str, params: dict, img_type: str, has_structural: bool):
                 nii_image = nii_file.get_fdata()
                 num_volumes = nii_image.shape[-1]
 
-            if (
-                params["ASL"]["ArterialSpinLabelingType"] == "pCASL"
-                or params["ASL"]["ArterialSpinLabelingType"] == "CASL"
-            ):
-                temp_value = params["ASL"]["PostLabelingDelay"]
-                temp_name = "PostLabelingDelay"
-            elif params["ASL"]["ArterialSpinLabelingType"] == "PASL":
-                temp_value = params["ASL"]["TI"]
-                temp_name = "TI"
-
-            if isinstance(temp_value, (list)):
-                if num_volumes != (2 * len(temp_value) - temp_value.count(0)):
+            if isinstance(params["ASL"]["PostLabelingDelay"], (list)):
+                if num_volumes != (
+                    2 * len(params["ASL"]["PostLabelingDelay"])
+                    - params["ASL"]["PostLabelingDelay"].count(0)
+                ):
                     return (
                         False,
-                        f"Number of volumes in ASL image does not match {temp_name} parameter",
+                        f"Number of volumes in ASL image does not match PostLabelingDelay parameter",
                     )
 
     asl_json_data, structural_json_data, m0_json_data, tsv_data = make_sidecar(
-        params, num_volumes
+        params, num_volumes, is_singledelay, is_labelcontrol
     )
 
     sessions_dict = {}
@@ -451,23 +446,19 @@ def convert2bids(root: str, params: dict, img_type: str, has_structural: bool):
     os.rename(source_path, os.path.join(root, "rawdata_user"))
     os.rename(os.path.join(root, "rawdata_temp"), source_path)
 
-    data_description_json = params["ASL"].copy()
+    data_description_json = asl_json_data.copy()
     if has_structural:
-        data_description_json["anat"] = params["anat"].copy()
+        data_description_json["anat"] = structural_json_data.copy()
     if params["ASL"]["M0Type"] != "Estimate":
-        data_description_json["M0"] = params["M0"].copy()
+        data_description_json["M0"] = m0_json_data.copy()
+    data_description_json["SingleDelay"] = is_singledelay
+    data_description_json["LabelControl"] = is_labelcontrol
     data_description_json["Images"] = sessions_dict.copy()
     data_description_json["ASLContext"] = tsv_data["volume_type"].copy()
     data_description_json["PLDList"] = []
-    if (
-        params["ASL"]["ArterialSpinLabelingType"] == "pCASL"
-        or params["ASL"]["ArterialSpinLabelingType"] == "CASL"
-    ):
-        temp_value = params["ASL"]["PostLabelingDelay"]
-    elif params["ASL"]["ArterialSpinLabelingType"] == "PASL":
-        temp_value = params["ASL"]["TI"]
-    if isinstance(temp_value, (list)):
-        PLD_temp = [pld for pld in temp_value if pld != 0]
+
+    if isinstance(params["ASL"]["PostLabelingDelay"], (list)):
+        PLD_temp = [pld for pld in params["ASL"]["PostLabelingDelay"] if pld != 0]
         i = 0
         for volume_type in tsv_data["volume_type"]:
             if volume_type == "label":
@@ -478,7 +469,9 @@ def convert2bids(root: str, params: dict, img_type: str, has_structural: bool):
     else:
         for volume_type in tsv_data["volume_type"]:
             if volume_type == "label":
-                data_description_json["PLDList"].append(temp_value)
+                data_description_json["PLDList"].append(
+                    params["ASL"]["PostLabelingDelay"]
+                )
             else:
                 data_description_json["PLDList"].append(0)
 
@@ -525,13 +518,6 @@ def read_asl_bids(root: str, img_type: str, has_structural: bool):
             with open(json_path, "r") as json_file:
                 json_info = json.load(json_file)
                 data_description_json = json_info.copy()
-            if (
-                data_description_json["ArterialSpinLabelingType"] == "pCASL"
-                or data_description_json["ArterialSpinLabelingType"] == "CASL"
-            ):
-                temp_value = data_description_json["PostLabelingDelay"]
-            elif data_description_json["ArterialSpinLabelingType"] == "PASL":
-                temp_value = data_description_json["TI"]
 
         for perf_image in perf_images:
             img_name = os.path.splitext(perf_image)[0]
@@ -552,9 +538,10 @@ def read_asl_bids(root: str, img_type: str, has_structural: bool):
                             data_description_json["LabelControl"] = False
                             break
                     data_description_json["PLDList"] = []
-                    if isinstance(temp_value, (list)):
-                        PLD_temp = [pld for pld in temp_value if pld != 0]
-                        PLD_unique = list(set(PLD_temp))
+                    if isinstance(data_description_json["PostLabelingDelay"], (list)):
+                        PLD_unique = list(
+                            set(data_description_json["PostLabelingDelay"])
+                        )
                         if len(PLD_unique) == 1:
                             data_description_json["SingleDelay"] = True
                         else:
@@ -562,7 +549,9 @@ def read_asl_bids(root: str, img_type: str, has_structural: bool):
                         j = 0
                         for item in volume_type:
                             if item == "label":
-                                data_description_json["PLDList"].append(PLD_temp[j])
+                                data_description_json["PLDList"].append(
+                                    data_description_json["PostLabelingDelay"][j]
+                                )
                                 j += 1
                             else:
                                 data_description_json["PLDList"].append(0)
@@ -570,7 +559,9 @@ def read_asl_bids(root: str, img_type: str, has_structural: bool):
                         data_description_json["SingleDelay"] = True
                         for item in volume_type:
                             if item == "label":
-                                data_description_json["PLDList"].append(temp_value)
+                                data_description_json["PLDList"].append(
+                                    data_description_json["PostLabelingDelay"]
+                                )
                             else:
                                 data_description_json["PLDList"].append(0)
                     read_tsv_flag = True
@@ -623,20 +614,24 @@ def create_derivatives_folders(data_descrip: dict):
                 raise OSError(f"Could not create directory: {der_anat_path}.")
 
 
-def load_data(root: str, params_json: str, convert=True):
+def load_data(
+    root: str, params_json="", convert=True, is_singledelay=True, is_labelcontrol=True
+):
     root = os.path.abspath(root)
     valid, error, img_type, has_structural = check_bids_format(root)
     if not valid:
         raise ValueError(error)
 
     if convert:
-        valid, error, params = read_params(params_json, has_structural)
+        valid, error, params = read_params(params_json, has_structural, is_singledelay)
         if not valid:
             raise ValueError(error)
         print("User-input parameters:")
         print(json.dumps(params, indent=4))
 
-        valid, error = convert2bids(root, params, img_type, has_structural)
+        valid, error = convert2bids(
+            root, params, img_type, has_structural, is_singledelay, is_labelcontrol
+        )
         if not valid:
             raise ValueError(error)
         print("Convert complete!")

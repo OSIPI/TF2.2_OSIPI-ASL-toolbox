@@ -158,7 +158,7 @@ def asltbx_perf_subtract(
     Rcsf = 0.87  # both Rwm and Rcsf are for 3T only, you need to change them for other field strength.
     lmbda = 0.9  # 0.9 mL/g
 
-    Delaytime = list([x for x in data_descrip["PLDList"] if x != 0])[0]
+    Delaytime = list([x * 1000.0 for x in data_descrip["PLDList"] if x != 0])[0]
 
     if data_descrip["MagneticFieldStrength"] == 1.5:
         T2wm = 55
@@ -175,7 +175,7 @@ def asltbx_perf_subtract(
         BloodT1 = 1810
     r1a = 1 / BloodT1
 
-    labeff = data_descrip["InversionEfficiency"]
+    labeff = data_descrip["LabelingEfficiency"]
 
     useM0 = False
     if QuantFlag != 0:
@@ -187,13 +187,13 @@ def asltbx_perf_subtract(
             M0b = (
                 M0wmcsf
                 * Rcsf
-                * np.exp((1 / T2csf - 1 / T2b) * data_descrip["M0"]["EchoTime"])
+                * np.exp((1 / T2csf - 1 / T2b) * data_descrip["M0"]["EchoTime"] * 1000)
             )
         else:
             M0b = (
                 M0wmcsf
                 * Rwm
-                * np.exp((1 / T2wm - 1 / T2b) * data_descrip["M0"]["EchoTime"])
+                * np.exp((1 / T2wm - 1 / T2b) * data_descrip["M0"]["EchoTime"] * 1000)
             )
     else:
         if data_descrip["M0Type"] == "Estimate":
@@ -298,7 +298,7 @@ def asltbx_perf_subtract(
                 )
                 Slicetime = 0
                 if "SliceDuration" in data_descrip:
-                    Slicetime = data_descrip["SliceDuration"]
+                    Slicetime = data_descrip["SliceDuration"] * 1000
                 for sss in range(alldat.shape[2]):
                     slicetimearray[:, sss] = slicetimearray[:, sss] * sss * Slicetime
                 slicetimearray = slicetimearray.ravel()
@@ -327,7 +327,8 @@ def asltbx_perf_subtract(
                                 2
                                 * M0b
                                 * np.exp(-TI / BloodT1)
-                                * data_descrip["TI1"]
+                                * data_descrip["BolusCutOffDelayTime"]
+                                * 1000
                                 * labeff
                                 * qTI
                             )
@@ -347,7 +348,8 @@ def asltbx_perf_subtract(
                                 2
                                 * effM0
                                 * np.exp(-TI / BloodT1)
-                                * data_descrip["TI1"]
+                                * data_descrip["BolusCutOffDelayTime"]
+                                * 1000
                                 * labeff
                                 * qTI
                             )
@@ -357,7 +359,7 @@ def asltbx_perf_subtract(
 
                 elif (
                     data_descrip["ArterialSpinLabelingType"] == "CASL"
-                    or data_descrip["ArterialSpinLabelingType"] == "pCASL"
+                    or data_descrip["ArterialSpinLabelingType"] == "PCASL"
                 ):
                     omega = Delaytime + slicetimearray
                     locMask = Vconimg.flat[vxidx]
@@ -389,7 +391,7 @@ def asltbx_perf_subtract(
                                 np.exp(-omega * r1a)
                                 - np.exp(
                                     -1
-                                    * (data_descrip["LabelingDuration"] + omega)
+                                    * (data_descrip["LabelingDuration"] * 1000 + omega)
                                     * r1a
                                 )
                             )

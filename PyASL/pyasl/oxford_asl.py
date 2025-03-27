@@ -59,20 +59,21 @@ def run_oxford_asl(
         cmd += ["--iaf", "ct"]
     if (
         data_descrip["ArterialSpinLabelingType"] == "CASL"
-        or data_descrip["ArterialSpinLabelingType"] == "pCASL"
+        or data_descrip["ArterialSpinLabelingType"] == "PCASL"
     ):
         cmd += ["--casl"]
-        tis = np.array([t for t in data_descrip["PLDList"] if t != 0]) / 1000.0
-        bolus = data_descrip["LabelingDuration"] / 1000.0
+        tis = np.array([t for t in data_descrip["PLDList"] if t != 0], dtype=float)
+        bolus = data_descrip["LabelingDuration"]
         tis += bolus
     elif data_descrip["ArterialSpinLabelingType"] == "PASL":
-        tis = np.array([t for t in data_descrip["PLDList"] if t != 0]) / 1000.0
-        bolus = data_descrip["TI1"] / 1000.0
+        tis = np.array([t for t in data_descrip["PLDList"] if t != 0], dtype=float)
+        bolus = data_descrip["BolusCutOffDelayTime"]
+        tis += bolus
     tis_str = ",".join(map(str, tis))
     cmd += ["--tis", tis_str]
     cmd += ["--bolus", str(bolus)]
     if "SliceDuration" in data_descrip:
-        cmd += ["--slicedt", str(data_descrip["SliceDuration"] / 1000.0)]
+        cmd += ["--slicedt", str(data_descrip["SliceDuration"])]
     if bat is not None:
         cmd += ["--bat", str(bat)]
     if t1 is not None:
@@ -106,14 +107,14 @@ def run_oxford_asl(
                 cmd += ["-i", asl_path]
                 if useCalibration:
                     cmd += ["-c", m0_path]
-                    cmd += ["--tr", str(data_descrip["M0"]["RepetitionTime"] / 1000.0)]
-                    cmd += ["--alpha", str(data_descrip["InversionEfficiency"])]
+                    cmd += ["--tr", str(data_descrip["M0"]["RepetitionTime"])]
+                    cmd += ["--alpha", str(data_descrip["LabelingEfficiency"])]
             else:
                 cmd += ["-i", os.path.join(key, "perf", asl_file)]
                 if useCalibration:
                     cmd += ["-c", os.path.join(key, "perf", value["M0"])]
-                    cmd += ["--tr", str(data_descrip["M0"]["RepetitionTime"] / 1000.0)]
-                    cmd += ["--alpha", str(data_descrip["InversionEfficiency"])]
+                    cmd += ["--tr", str(data_descrip["M0"]["RepetitionTime"])]
+                    cmd += ["--alpha", str(data_descrip["LabelingEfficiency"])]
 
             key_der = key.replace("rawdata", "derivatives")
             cmd += ["-o", key_der]
