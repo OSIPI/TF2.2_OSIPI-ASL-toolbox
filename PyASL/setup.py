@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="pyasl",
+    name="pyasl-osipi",
     version="0.1.0",
     description="A composite, open-source Python library for processing human and preclinical ASL MRI data.",
     long_description=open("README.md", encoding="utf-8").read(),

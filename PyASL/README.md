@@ -18,7 +18,7 @@ It integrates multiple community-validated ASL tools, originally in MATLAB, and 
 You can install PyASL using pip:
 
 ```bash
-pip install pyasl
+pip install pyasl-osipi
 ```
 
 
