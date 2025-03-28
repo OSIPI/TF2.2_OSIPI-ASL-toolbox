@@ -40,5 +40,5 @@ This library is part of the ISMRM 2025 submission:
 
 
 ## License
-This project is licensed under the MIT License – see the [LICENSE](https://github.com/Trico01/PyASL/blob/main/LICENSE) file for details.
+This project is licensed under the MIT License – see the [LICENSE](https://github.com/OSIPI/TF2.2_OSIPI-ASL-toolbox/blob/main/PyASL/LICENSE) file for details.
 Original repository: https://github.com/Trico01/PyASL
