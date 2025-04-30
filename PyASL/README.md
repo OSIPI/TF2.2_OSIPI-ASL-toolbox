@@ -10,7 +10,7 @@ It integrates multiple community-validated ASL tools, originally in MATLAB, and 
 
 - 🧠 Human and 🐭 preclinical ASL support
 - 📂 ASL-BIDS format compatibility
-- 📘 [Tutorials and Documentation](https://github.com/Trico01/pyasl/wiki/Tutorials)
+- 📘 [Tutorials and Documentation](https://pyasl-doc.readthedocs.io/)
 
 
 
