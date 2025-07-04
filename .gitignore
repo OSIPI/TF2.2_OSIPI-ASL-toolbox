@@ -40,6 +40,7 @@ tmp
 
 # Temporary folder
 temp_dir/
+venv/
 
 # IDEs & Editors
 .idea

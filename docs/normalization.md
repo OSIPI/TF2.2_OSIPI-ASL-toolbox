@@ -1,37 +1,21 @@
 # Normalization to common template (e.g., MNI space)
 
-### `ASLtbx_spm12normest`
+### Function name: `ASLtbx_spm12normest`
+*   **Description:** Normalize the structural image to the standard template (TPM.nii) using spm12 functions.
+*   **Inputs:** `strucimg` should be paths of the target structural images
+*   **Outputs:** normalized structural images in the assigned folder
+*   **Syntax:** `ASLtbx_spm12normest(strucimg)`
 
-Normalize the structural image to the standard template (TPM.nii) using spm12 functions.
+!!! note "Notes"
+    The whole script runs fine, however, the normalized image is black and white.
 
-!!! info "Inputs"
-    - strucimg should be paths of the target structural images
-
-!!! success "Outputs"
-    - normalized structural images in the assigned folder
-
-!!! warning "Notes"
-    - The whole script runs fine, however, the normalized image is black and white.
-
-!!! example "Syntax"
-    ```matlab
-    ASLtbx_spm12normest(strucimg)
-    ```
 ---
-### `ASLtbx_spm12normest`
 
-Normalize the structural image to the standard template (TPM.nii) using spm12 functions.
+### Function name: `ASLtbx_spm12normest`
+*   **Description:** Normalize the structural image to the standard template (TPM.nii) using spm12 functions.
+*   **Inputs:** `strucimg` should be paths of the target structural images
+*   **Outputs:** normalized structural images in the assigned folder
+*   **Syntax:** `ASLtbx_spm12normest(strucimg)`
 
-!!! info "Inputs"
-    - strucimg should be paths of the target structural images
-
-!!! success "Outputs"
-    - normalized structural images in the assigned folder
-
-!!! warning "Notes"
-    - The whole script runs fine, however, the normalized image is black and white.
-
-!!! example "Syntax"
-    ```matlab
-    ASLtbx_spm12normest(strucimg)
-    ```
+!!! note "Notes"
+    The whole script runs fine, however, the normalized image is black and white.

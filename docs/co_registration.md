@@ -1,48 +1,23 @@
 # Co-registration of ASL images to high resolution T1-weighted, T2-weighted, and/or FLAIR images
 
-### `ASLtbx_spmcoreg.m`
-
-using spm for registering source and allimgs to target.
-
-!!! info "Inputs"
-    - target, source, allimgs
-
-!!! success "Outputs"
-    - co-registered images
-
-!!! example "Syntax"
-    ```matlab
-    [output]=ASLtbx_spmcoreg(target, source, allimgs)
-    ```
+### Function name: `ASLtbx_spmcoreg.m`
+*   **Description:** using spm for registering source and allimgs to target.
+*   **Inputs:** `target`, `source`, `allimgs`
+*   **Outputs:** co-registered images
+*   **Syntax:** `[output]=ASLtbx_spmcoreg(target, source, allimgs)`
 
 ---
-### `ASL_coreg`
 
-coregister source to target and apply transform matrix to source and varargin
-
-!!! info "Inputs"
-    - target,source,varargin
-
-!!! success "Outputs"
-    - co-registered images and transformation matrix
-
-!!! example "Syntax"
-    ```matlab
-    ASL_coreg(target,source,varargin)
-    ```
+### Function name: `ASL_coreg`
+*   **Description:** coregister source to target and apply transform matrix to source and varargin
+*   **Inputs:** `target`, `source`, `varargin`
+*   **Outputs:** co-registered images and transformation matrix
+*   **Syntax:** `ASL_coreg(target,source,varargin)`
 
 ---
-### `spm_reslice_yli`
 
-similar to spm_reslice, does co-registration
-
-!!! info "Inputs"
-    - P - matrix or cell array of filenames flags - a structure containing various options.
-
-!!! success "Outputs"
-    - co-registered image files to the same subdirectory with a prefix.
-
-!!! example "Syntax"
-    ```matlab
-    spm_reslice_yli(P,flags)
-    ```
+### Function name: `spm_reslice_yli`
+*   **Description:** similar to spm_reslice, does co-registration
+*   **Inputs:** `P` - matrix or cell array of filenames flags - a structure containing various options.
+*   **Outputs:** co-registered image files to the same subdirectory with a prefix.
+*   **Syntax:** `spm_reslice_yli(P,flags)`
