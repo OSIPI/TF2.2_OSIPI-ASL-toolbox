@@ -45,3 +45,4 @@ venv/
 # IDEs & Editors
 .idea
 *~
+.vscode
