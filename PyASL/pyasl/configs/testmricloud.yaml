@@ -1,0 +1,22 @@
+type: mricloud 
+
+steps:
+  - name: MRICloudRescale
+
+  - name: Realign
+    params:
+      register_to_mean: false
+      interp: 4
+
+  - name: MRICloudCalculateDiffmap
+
+  - name: MRICloudCalculateM0
+    params:
+      t1_tissue: 1165
+      bgs_eff: 0.93
+
+  - name: MRICloudCalculateCBF
+    params:
+      t1_blood: 1650
+      part_coef: 0.9
+      bgs_eff: 0.93

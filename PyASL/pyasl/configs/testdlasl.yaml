@@ -1,0 +1,7 @@
+type: dlasl
+steps:
+  - name: DLASLBuildMask
+
+  - name: DLASLDenoiseCBF
+    params:
+      model_selection: 1 # 0:healthy, 1:ADNI

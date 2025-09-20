@@ -1,0 +1,20 @@
+type: pcasl
+
+steps:
+  - module: BrukerLoader
+    params: { expno: 18, prono: 1 } 
+  - module: SteadyStateTrim
+    params: { trim: 2 }
+  - module: ControlLabelSplit
+    params: { control_first: true }
+  - module: MotionCheck
+  - module: DiffImage
+  - module: ComputeM0
+    params: { TR: from_meta, T1t: 1900 } 
+  - module: SlicePLDAdjust
+    params: { SGap: 31, T1blood: 2800 }
+  - module: CBFRelative
+    params: { vmax: 10 }
+  - module: BrainMask
+    params: { thres: 0.2, open_iter: 2, close_iter: 2 }
+  - module: SaveOutputs
