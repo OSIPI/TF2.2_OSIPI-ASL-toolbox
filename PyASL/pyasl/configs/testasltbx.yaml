@@ -1,0 +1,28 @@
+type: asltbx
+
+steps:
+  - name: ResetOrientation
+
+  - name: Realign
+
+  - name: Coregister
+
+  - name: Smooth
+    params:
+      fwhm: [6, 6, 6]
+
+  - name: CreateMask
+    params:
+      thres: 0.05
+
+  - name: PerfusionQuantify
+    params:
+      QuantFlag: 0
+      M0wmcsf: None
+      MaskFlag: true
+      MeanFlag: true
+      BOLDFlag: false
+      PerfFlag: false
+      SubtractionType: 0
+      SubtrationOrder: 1
+      Timeshift: 0.5

@@ -1,0 +1,13 @@
+# pyasl/configs/mixed.yaml
+
+type: custom
+
+steps:
+  - name: ResetOrientation
+
+  - name: MRICloudRescale
+
+  - name: Realign
+    params:
+      register_to_mean: false
+      interp: 4

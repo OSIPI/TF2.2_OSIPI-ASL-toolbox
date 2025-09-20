@@ -1,0 +1,13 @@
+type: oxford_asl
+
+steps:
+  - name: OxfordASLSplitM0
+
+  - name: OxfordASLRun
+    params:
+      useStructural: true
+      useCalibration: false
+      wp: false
+      mc: false
+      ibf: rpt
+      debug: true

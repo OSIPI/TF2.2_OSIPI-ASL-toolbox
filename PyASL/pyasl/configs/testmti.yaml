@@ -1,0 +1,34 @@
+type: mti
+
+steps:
+  - module: NIfTILoader
+    params:
+      path: "FAIREPI.img"
+      target: AbsData
+      squeeze_last: true
+      savedir: "results_mti"
+  - module: AbsCBF_T1Fit
+    params:
+      sel_index: [0, 16, 1, 17, 2, 18, 3, 19, 4, 20, 5, 21, 6, 22, 7, 23]
+      glo_index: [8, 24, 9, 25, 10, 26, 11, 27, 12, 28, 13, 29, 14, 30, 15, 31]
+      TI_list:
+        [
+          0.02681697,
+          0.08681697,
+          0.18681697,
+          0.28681697,
+          0.38681697,
+          0.48681697,
+          0.58681697,
+          0.78681697,
+          0.98681697,
+          1.18681697,
+          1.48681697,
+          1.78681697,
+          2.08681697,
+          2.38681697,
+          2.68681697,
+          2.98681697,
+        ]
+      save_curves_every: 200
+  - module: SaveOutputs
