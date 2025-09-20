@@ -18,3 +18,5 @@ We received contributions from different groups, including：
 ## What we have presented here!
 The source code has been reviewed by our team and the functionalities are being separated and documented. However, one function  may have dependences on other functions within the repository. So, in this git repository, all functions will be preseneted within their original repo.
 
+## Documentation
+We have also hosted a documentation for [ASL_functionalities_test_report_Github.docx](ASL_functionalities_test_report_Github.docx) under the `docs` directory.
