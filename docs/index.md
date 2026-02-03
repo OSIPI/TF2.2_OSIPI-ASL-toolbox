@@ -1,5 +1,16 @@
-# Task Force 2.2: ASL Functionalities-Test Report
+# OSIPI ASL Toolbox
 
-Welcome to the documentation for the ASL Toolbox.  
+A curated library of open-source functions for Arterial Spin Labeling (ASL) perfusion MRI preprocessing and analysis, developed by [OSIPI Task Force 2.2](https://osipi.org/).
 
-This documentation is generated from [ASL_functionalities_test_report_Github.docx](https://github.com/OSIPI/TF2.2_OSIPI-ASL-toolbox/blob/main/ASL_functionalities_test_report_Github.docx)
+## Contributing Toolboxes
+
+- **ASLtbx & DL-ASL** — University of Maryland
+- **ASL-MRICloud** — Johns Hopkins University
+- **BASIL & Oxford-ASL** — University of Oxford / Nottingham
+- **ExploreASL** — [exploreASL.org](https://www.exploreasl.org/)
+- **DeepASL** — Technical University of Munich
+- **Preclinical ASL** — Multi-site contributions
+
+## Documentation
+
+Browse the sidebar for function documentation organized by processing step, from [motion correction](motion_correction.md) through [CBF quantification](cbf_quantification.md) to [deep learning denoising](deep_learning.md).
