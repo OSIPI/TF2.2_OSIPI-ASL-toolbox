@@ -3,3 +3,4 @@ mkdocs-multirepo-plugin
 mkdocs-material
 mkdocs-material-extensions
 mkdocs-minify-plugin
+Pygments
