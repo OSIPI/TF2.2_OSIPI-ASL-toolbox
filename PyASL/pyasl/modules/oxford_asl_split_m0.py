@@ -75,7 +75,7 @@ class OxfordASLSplitM0:
             if not m0_path or not os.path.exists(m0_path):
                 raise ValueError("ASLContext has no 'm0scan' and no separate M0 found in data_descrip['Images'][base]['M0'].")
 
-            logger.info(f"[OxfordASL::SplitM0] No 'm0scan' found; pass-through. asl={in_asl} m0={m0_path}")
+            logger.info("[OxfordASL::SplitM0] No 'm0scan' found; pass-through. asl=%s m0=%s", in_asl, m0_path)
             return {"asl_path": in_asl, "m0_path": m0_path}
 
         der_dir = _deriv_dir(base_dir)
@@ -96,5 +96,5 @@ class OxfordASLSplitM0:
         nib.Nifti1Image(asl_data, V.affine, V.header).to_filename(out_asl)
         nib.Nifti1Image(m0_data,  V.affine, V.header).to_filename(out_m0)
 
-        logger.info(f"[OxfordASL::SplitM0] in={in_asl} -> asl={out_asl}  m0={out_m0}")
+        logger.info("[OxfordASL::SplitM0] in=%s -> asl=%s  m0=%s", in_asl, out_asl, out_m0)
         return {"asl_path": out_asl, "m0_path": out_m0}
