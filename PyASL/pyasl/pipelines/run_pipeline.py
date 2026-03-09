@@ -102,7 +102,7 @@ def _resolve_runner(pipeline_type: str) -> Callable[[str, str], object]:
     # Check registry first
     if key in _PIPELINE_REGISTRY:
         mod_name, func_name = _PIPELINE_REGISTRY[key]
-        logger.info(f"Using registry: {key} -> {mod_name}.{func_name}()")
+        logger.info("Using registry: %s -> %s.%s()", key, mod_name, func_name)
         mod = importlib.import_module(mod_name)
         fn = getattr(mod, func_name, None)
         if not callable(fn):
@@ -111,7 +111,7 @@ def _resolve_runner(pipeline_type: str) -> Callable[[str, str], object]:
 
     # Fallback: convention
     mod_name, func_candidates = _convention_candidates(key)
-    logger.info(f"Trying convention: module={mod_name}, funcs={func_candidates}")
+    logger.info("Trying convention: module=%s, funcs=%s", mod_name, func_candidates)
     try:
         mod = importlib.import_module(mod_name)
     except ModuleNotFoundError:
@@ -121,7 +121,7 @@ def _resolve_runner(pipeline_type: str) -> Callable[[str, str], object]:
         for fname in func_candidates:
             fn = getattr(mod, fname, None)
             if callable(fn):
-                logger.info(f"Resolved by convention: {mod_name}.{fname}()")
+                logger.info("Resolved by convention: %s.%s()", mod_name, fname)
                 return fn
 
     # Nothing worked
@@ -153,11 +153,11 @@ def run_pipeline(input_dir: str, config_path: str) -> object:
     if not ptype:
         raise KeyError("Config YAML must include a top-level 'type' field.")
 
-    logger.info(f"Pipeline type: {ptype}")
+    logger.info("Pipeline type: %s", ptype)
     runner = _resolve_runner(ptype)
 
     # Forward arguments as-is
-    logger.info(f"Dispatching to runner with input='{input_p}', config='{cfg_p}'")
+    logger.info("Dispatching to runner with input='%s', config='%s'", input_p, cfg_p)
     return runner(str(input_p), str(cfg_p))
 
 

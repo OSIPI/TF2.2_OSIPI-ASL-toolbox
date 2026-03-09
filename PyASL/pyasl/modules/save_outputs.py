@@ -21,4 +21,4 @@ class SaveOutputs():
         if p.get("config_echo"):
             with open(os.path.join(savedir, "config_echo.yaml"), "w") as f:
                 f.write(p["config_echo"])
-        logger.info(f"[SaveOutputs] Saved to {savedir}")
+        logger.info("[SaveOutputs] Saved to %s", savedir)
