@@ -1,48 +1,55 @@
 # Dependencies
-node_modules
-__pycache__
-venv
-.venv
+node_modules/
+__pycache__/
+venv/
+.venv/
+
+# Python
+*.py[cod]
+.pytest_cache/
 
 # Build files
-build
-site
+build/
+dist/
+site/
 
 # Distribution files
-dist
-mkdocs_material.egg-info
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
 
 # Caches and logs
 *.cpuprofile
 *.log
 *.tsbuildinfo
-.cache
+.cache/
 .eslintcache
-__pycache__
+
+# Coverage
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
 
 # Examples
-example
+example/
 example.zip
-
-# -----------------------------------------------------------------------------
-# General
-# -----------------------------------------------------------------------------
 
 # Never ignore .gitkeep files
 !**/.gitkeep
 
-# macOS internals
+# macOS
 .DS_Store
 
 # Temporary files
-TODO
-tmp
-
-# Temporary folder
+/TODO
+tmp/
 temp_dir/
-venv/
 
 # IDEs & Editors
-.idea
+.idea/
+.vscode/
 *~
-.vscode
+
+# Project-specific
+mkdocs_material.egg-info/
