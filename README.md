@@ -12,7 +12,7 @@ We received contributions from different groups, including：
 	- ASL-MRICloud from the Johns Hopkins University School of Medicine
 	- BASIL and Quantiphyse（ASL) from the University of Nottingham, Clinical ASL from UMC Utrecht
 	- DeepASL from the Technical University of Munich
-	- ExploreASL from a team of international researchers (www.ExploreASL.org).  
+	- ExploreASL from a team of international researchers ([https://github.com/ExploreASL/ExploreASL](https://github.com/ExploreASL/ExploreASL)).  
  	- Preclinical ASL pipelines
 
 ## What we have presented here!
