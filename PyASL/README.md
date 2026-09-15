@@ -6,7 +6,7 @@
   <img src="https://raw.githubusercontent.com/elooff/pyasl/master/docs/source/_static/osipi_logo.png" alt="OSIPI" height="70"/>
 </p>
 
-**PyASL** is an open-source Python library for processing arterial spin labeling (ASL) MRI data, developed under the [Google Summer of Code (GSoC)](https://summerofcode.withgoogle.com/) program for the [ISMRM OSIPI Task Force 2.2](https://osipi.ismrm.org/task-forces/task-force-2-2/).
+**PyASL** is an open-source Python library for processing arterial spin labeling (ASL) MRI data, developed under the [Google Summer of Code (GSoC)](https://summerofcode.withgoogle.com/) program for the [ISMRM OSIPI Task Force 2.2](https://osipi.github.io/tf/tf2-2/).
 
 It integrates multiple community-validated ASL tools, originally in MATLAB, and supports both human and preclinical pipelines. PyASL includes modules for ASL-MRICloud, ASLtbx, DL-ASL, Oxford ASL, preclinical multi-TI PASL, and preclinical pCASL, harmonized with ASL-BIDS input format.
 
