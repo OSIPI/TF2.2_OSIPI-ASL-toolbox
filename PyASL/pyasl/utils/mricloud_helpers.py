@@ -1,4 +1,5 @@
 import os
+import re
 import glob
 import numpy as np
 import nibabel as nib
